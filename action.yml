@@ -1,0 +1,26 @@
+# action.yaml
+name: 'FireTail API Spec uploader'
+description: 'A Github Action that will upload an API Spec file to the FireTail Platform'
+inputs:
+  FIRETAIL_API_TOKEN:
+    description: 'FireTail API token'
+    required: true
+  COLLECTION_UUID:
+    description: 'FireTail API Collection UUID'
+    required: true
+  API_SPEC_LOCATION:
+    description: 'Path to API Spec file'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+      shell: bash
+    - name: Upload Spec File
+      run: python src/process_api_spec.py
+      shell: bash
