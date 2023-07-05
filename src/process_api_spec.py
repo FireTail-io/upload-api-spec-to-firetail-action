@@ -33,7 +33,10 @@ def load_from_fs():
 
 def is_spec_valid(spec_data: dict) -> bool:
     parser = ResolvingParser(
-        spec_string=json.dumps(spec_data), resolve_types=RESOLVE_INTERNAL, backend="openapi-spec-validator", lazy=True
+        spec_string=json.dumps(spec_data, default=str),
+        resolve_types=RESOLVE_INTERNAL,
+        backend="openapi-spec-validator",
+        lazy=True,
     )
     try:
         parser.parse()
