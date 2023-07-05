@@ -18,6 +18,8 @@ class SpecDataValidationError(Exception):
 
 
 def load_from_fs():
+    if not API_SPEC_LOCATION:
+        raise Exception("API_SPEC_LOCATION not defined")
     if not os.path.exists(API_SPEC_LOCATION):
         raise Exception(f"API Spec file could not be found at {API_SPEC_LOCATION}")
     with open(API_SPEC_LOCATION, "r") as file_handler:
@@ -43,7 +45,7 @@ def is_spec_valid(spec_data: dict) -> bool:
 
 
 def resolve_and_validate_spec_data(spec_data: dict) -> dict:
-    if not is_spec_valid(spec_type, spec_data):
+    if not is_spec_valid(spec_data):
         raise SpecDataValidationError()
 
     return spec_data
@@ -62,11 +64,13 @@ def send_spec_to_firetail():
     spec_data = load_from_fs()
 
     try:
-        spec_data = resolve_and_validate_spec_data(spec_data, data["spec_type"])
+        spec_data = resolve_and_validate_spec_data(spec_data)
     except SpecDataValidationError:
         return Exception("Spec file is not valid")
 
-    json_data = {"collection_uuid": COLLECTION_UUID, "spec_file": spec_data, "spec_type": get_spec_type(spec_data)}
-    response = requests.post(url=f"{FIRETAIL_API_URL}/code_repository/spec", json=json_data)
+    json_data = {"collection_uuid": COLLECTION_UUID, "spec_data": spec_data, "spec_type": get_spec_type(spec_data)}
+    response = requests.post(
+        url=f"{FIRETAIL_API_URL}/code_repository/spec", json=json_data, headers={"x-ft-api-key": FIRETAIL_API_TOKEN}
+    )
     if response.status_code != 201:
-        raise Exception("Failed to send FireTail API Spec")
+        raise Exception(f"Failed to send FireTail API Spec. {response.text}")
