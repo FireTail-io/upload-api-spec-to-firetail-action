@@ -1,2 +1,4 @@
 PyYAML
 requests
+openapi-spec-validator
+prance
