@@ -5,7 +5,7 @@ on: [push]
 jobs:
   get-num-square:
     runs-on: ubuntu-latest
-    name: Return's the number square
+    name: Check action is valid
     steps:
       - name: Checkout
         uses: actions/checkout@v2

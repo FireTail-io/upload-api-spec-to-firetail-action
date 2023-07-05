@@ -6,7 +6,6 @@ import yaml
 from prance import ResolvingParser
 from prance.util.resolver import RESOLVE_INTERNAL
 
-# get the input and convert it to int
 FIRETAIL_API_URL = os.environ.get("FIRETAIL_API_URL", "https://api.saas.eu-west-1.prod.firetail.app")
 FIRETAIL_API_TOKEN = os.environ.get("FIRETAIL_API_TOKEN")
 COLLECTION_UUID = os.environ.get("COLLECTION_UUID")
@@ -74,3 +73,7 @@ def send_spec_to_firetail():
     )
     if response.status_code != 201:
         raise Exception(f"Failed to send FireTail API Spec. {response.text}")
+
+
+if __name__ == "__main__":
+    send_spec_to_firetail()
