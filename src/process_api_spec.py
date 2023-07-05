@@ -71,3 +71,6 @@ def send_spec_to_firetail():
     response = requests.post(url=f"{FIRETAIL_API_URL}/code_repository/spec", json=json_data)
     if response.status_code != 201:
         raise Exception("Failed to send FireTail API Spec")
+
+if __name__ == '__main__':
+    send_spec_to_firetail()
