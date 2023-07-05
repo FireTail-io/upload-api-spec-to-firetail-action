@@ -5,6 +5,10 @@ inputs:
   FIRETAIL_API_TOKEN:
     description: 'FireTail API token'
     required: true
+  FIRETAIL_API_URL:
+    description: 'FireTail API token'
+    required: false
+    default: 'https://api.saas.eu-west-1.prod.firetail.app'
   COLLECTION_UUID:
     description: 'FireTail API Collection UUID'
     required: true
