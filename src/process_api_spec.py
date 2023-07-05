@@ -6,8 +6,6 @@ import yaml
 from prance import ResolvingParser
 from prance.util.resolver import RESOLVE_INTERNAL
 
-from exceptions import SpecDataValidationError
-
 FIRETAIL_API_URL = os.environ.get("FIRETAIL_API_URL", "https://api.saas.eu-west-1.prod.firetail.app")
 FIRETAIL_API_TOKEN = os.environ.get("FIRETAIL_API_TOKEN")
 COLLECTION_UUID = os.environ.get("COLLECTION_UUID")

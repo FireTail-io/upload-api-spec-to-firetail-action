@@ -16,17 +16,5 @@ inputs:
     description: 'Path to API Spec file'
     required: true
 runs:
-  using: 'composite'
-  steps:
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    - name: Install Dependencies
-      run: |
-          ls src/ -all
-          pip install -r requirements.txt
-      shell: bash
-    - name: Upload Spec File
-      run: python src/process_api_spec.py
-      shell: bash
+  using: "docker"
+  image: "Dockerfile"
