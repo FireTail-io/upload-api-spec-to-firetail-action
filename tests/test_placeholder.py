@@ -28,7 +28,7 @@ class TestProcessAPISpec:
             responses.POST,
             f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec",
             json={"status": "success"},
-            status=200,
+            status=201,
         )
 
         self.app_spec_module.send_spec_to_firetail()
