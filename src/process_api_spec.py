@@ -63,6 +63,8 @@ def get_spec_type(spec_data: dict):
 
 
 def send_spec_to_firetail():
+    if not FIRETAIL_API_TOKEN:
+        raise Exception("Missing FireTail API token")
     spec_data = load_from_fs()
 
     try:
