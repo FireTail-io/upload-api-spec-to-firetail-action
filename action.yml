@@ -5,6 +5,10 @@ inputs:
   FIRETAIL_API_TOKEN:
     description: 'FireTail API token'
     required: true
+  FIRETAIL_API_URL:
+    description: 'FireTail API token'
+    required: false
+    default: 'https://api.saas.eu-west-1.prod.firetail.app'
   COLLECTION_UUID:
     description: 'FireTail API Collection UUID'
     required: true
@@ -12,15 +16,5 @@ inputs:
     description: 'Path to API Spec file'
     required: true
 runs:
-  using: 'composite'
-  steps:
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    - name: Install Dependencies
-      run: pip install -r requirements.txt
-      shell: bash
-    - name: Upload Spec File
-      run: python src/process_api_spec.py
-      shell: bash
+  using: "docker"
+  image: "Dockerfile"

@@ -34,7 +34,7 @@ jobs:
       - uses: jpetrucciani/bandit-check@main
         with:
           path: '.'
-  build-docker-image:
+  test-python-code:
     runs-on: ubuntu-latest
     needs: [bandit, semgrep]
     steps:
