@@ -22,12 +22,21 @@ def load_from_fs():
     if not os.path.exists(API_SPEC_LOCATION):
         raise Exception(f"API Spec file could not be found at {API_SPEC_LOCATION}")
     with open(API_SPEC_LOCATION, "r") as file_handler:
-        if API_SPEC_LOCATION.lower().endswith(("yaml", "yml")):
-            # load yaml
-            spec = yaml.safe_load(file_handler)
-        if API_SPEC_LOCATION.lower().endswith("json"):
-            # load json
-            spec = json.loads(file_handler.read())
+        try:
+            if API_SPEC_LOCATION.lower().endswith(("yaml", "yml")):
+                # load yaml
+                spec = yaml.safe_load(file_handler)
+            elif API_SPEC_LOCATION.lower().endswith("json"):
+                # load json
+                spec = json.loads(file_handler.read())
+            else:
+                raise ValueError(f"Unknown file type for API Spec: {API_SPEC_LOCATION}")
+        except yaml.YAMLError:
+            raise Exception(f"Failed to parse YAML. Spec is invalid.")
+        except json.JSONDecodeError:
+            raise Exception(f"Failed to parse JSON")
+        except Exception:
+            raise Exception(f"Failed to read API spec file. Spec is invalid.")
     return spec
 
 
@@ -44,6 +53,15 @@ def is_spec_valid(spec_data: dict) -> bool:
         # In the future, maybe we can provide some proper details here.
         return False
     return True
+
+
+def check_environment_variables():
+    if not FIRETAIL_API_TOKEN:
+        raise Exception("Missing FireTail API token")
+    if not COLLECTION_UUID:
+        raise Exception("Missing FireTail API collection UUID")
+    if not FIRETAIL_API_URL:
+        raise Exception("Missing FireTail API URL")
 
 
 def resolve_and_validate_spec_data(spec_data: dict) -> dict:
@@ -63,8 +81,7 @@ def get_spec_type(spec_data: dict):
 
 
 def send_spec_to_firetail():
-    if not FIRETAIL_API_TOKEN:
-        raise Exception("Missing FireTail API token")
+    check_environment_variables()
     spec_data = load_from_fs()
 
     try:
