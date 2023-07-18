@@ -1,6 +1,9 @@
 # src/get_num_square.py
 import os
+from dataclasses import dataclass, asdict, field
 import requests
+import time
+from typing import Optional
 import json
 import yaml
 from prance import ResolvingParser
@@ -11,6 +14,29 @@ FIRETAIL_API_TOKEN = os.environ.get("FIRETAIL_API_TOKEN")
 COLLECTION_UUID = os.environ.get("COLLECTION_UUID")
 API_SPEC_LOCATION = os.environ.get("API_SPEC_LOCATION")
 CONTEXT = os.environ.get("CONTEXT", {})
+
+
+@dataclass
+class GitHubContext:
+    sha: str
+    repository: str
+    ref: str
+    head_commit_username: str
+    actor: str
+    workflow_ref: str
+    event_name: str
+    private: bool
+    run_id: str
+    time_triggered: int
+
+
+@dataclass
+class FireTailRequestBody:
+    collection_uuid: str
+    spec_data: dict
+    spec_type: str
+    context: Optional[GitHubContext] = None
+
 
 class SpecDataValidationError(Exception):
     pass
@@ -88,10 +114,34 @@ def send_spec_to_firetail():
         spec_data = resolve_and_validate_spec_data(spec_data)
     except SpecDataValidationError:
         return Exception("Spec file is not valid")
-    print(CONTEXT)
-    json_data = {"collection_uuid": COLLECTION_UUID, "spec_data": spec_data, "spec_type": get_spec_type(spec_data)}
+    global CONTEXT
+
+    if isinstance(CONTEXT, str):
+        CONTEXT = json.loads(CONTEXT)
+
+    request_body = FireTailRequestBody(
+        collection_uuid=COLLECTION_UUID, spec_data=spec_data, spec_type=get_spec_type(spec_data), context={}
+    )
+
+    if CONTEXT != {}:
+        additional_context = GitHubContext(
+            sha=CONTEXT.get("sha", ""),
+            repository=CONTEXT.get("repository", ""),
+            ref=CONTEXT.get("ref", ""),
+            head_commit_username=CONTEXT.get("event", {}).get("head_commit", {}).get("author", {}).get("username", ""),
+            actor=CONTEXT.get("actor", ""),
+            workflow_ref=CONTEXT.get("workflow_ref", ""),
+            event_name=CONTEXT.get("event_name", ""),
+            private=CONTEXT.get("event", {}).get("repository", {}).get("private"),
+            run_id=CONTEXT.get("run_id"),
+            time_triggered=int(time.time() * 1000 * 1000),
+        )
+        request_body.context = additional_context
+
     response = requests.post(
-        url=f"{FIRETAIL_API_URL}/code_repository/spec", json=json_data, headers={"x-ft-api-key": FIRETAIL_API_TOKEN}
+        url=f"{FIRETAIL_API_URL}/code_repository/spec",
+        json=asdict(request_body),
+        headers={"x-ft-api-key": FIRETAIL_API_TOKEN},
     )
     if response.status_code not in {201, 409}:
         raise Exception(f"Failed to send FireTail API Spec. {response.text}")
