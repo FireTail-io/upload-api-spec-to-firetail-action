@@ -21,13 +21,13 @@ class GitHubContext:
     sha: str
     repository: str
     ref: str
-    head_commit_username: str
+    headCommitUsername: str
     actor: str
-    workflow_ref: str
-    event_name: str
+    workflowRef: str
+    eventName: str
     private: bool
-    run_id: str
-    time_triggered: int
+    runId: str
+    timeTriggered: int
 
 
 @dataclass
@@ -128,13 +128,13 @@ def send_spec_to_firetail():
             sha=CONTEXT.get("sha", ""),
             repository=CONTEXT.get("repository", ""),
             ref=CONTEXT.get("ref", ""),
-            head_commit_username=CONTEXT.get("event", {}).get("head_commit", {}).get("author", {}).get("username", ""),
+            headCommitUsername=CONTEXT.get("event", {}).get("head_commit", {}).get("author", {}).get("username", ""),
             actor=CONTEXT.get("actor", ""),
-            workflow_ref=CONTEXT.get("workflow_ref", ""),
-            event_name=CONTEXT.get("event_name", ""),
+            workflowRef=CONTEXT.get("workflow_ref", ""),
+            eventName=CONTEXT.get("event_name", ""),
             private=CONTEXT.get("event", {}).get("repository", {}).get("private"),
-            run_id=CONTEXT.get("run_id"),
-            time_triggered=int(time.time() * 1000 * 1000),
+            runId=CONTEXT.get("run_id"),
+            timeTriggered=int(time.time() * 1000 * 1000),
         )
         request_body.context = additional_context
 
