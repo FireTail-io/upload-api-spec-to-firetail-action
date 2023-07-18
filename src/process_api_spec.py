@@ -10,7 +10,7 @@ FIRETAIL_API_URL = os.environ.get("FIRETAIL_API_URL", "https://api.saas.eu-west-
 FIRETAIL_API_TOKEN = os.environ.get("FIRETAIL_API_TOKEN")
 COLLECTION_UUID = os.environ.get("COLLECTION_UUID")
 API_SPEC_LOCATION = os.environ.get("API_SPEC_LOCATION")
-
+CONTEXT = os.environ.get("CONTEXT", {})
 
 class SpecDataValidationError(Exception):
     pass
@@ -88,7 +88,7 @@ def send_spec_to_firetail():
         spec_data = resolve_and_validate_spec_data(spec_data)
     except SpecDataValidationError:
         return Exception("Spec file is not valid")
-
+    print(CONTEXT)
     json_data = {"collection_uuid": COLLECTION_UUID, "spec_data": spec_data, "spec_type": get_spec_type(spec_data)}
     response = requests.post(
         url=f"{FIRETAIL_API_URL}/code_repository/spec", json=json_data, headers={"x-ft-api-key": FIRETAIL_API_TOKEN}
