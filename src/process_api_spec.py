@@ -133,7 +133,7 @@ def send_spec_to_firetail():
         additional_context = GitHubContext(
             sha=CONTEXT.get("sha", ""),
             repositoryId=CONTEXT.get("repository_id", ""),
-            repositoryName=CONTEXT.get("name", ""),
+            repositoryName=CONTEXT.get("event", {}).get("repository", {}).get("name", ""),
             repositoryOwner=CONTEXT.get("repository_owner", ""),
             ref=CONTEXT.get("ref", ""),
             headCommitUsername=CONTEXT.get("event", {}).get("head_commit", {}).get("author", {}).get("username", ""),
