@@ -1,6 +1,7 @@
 # src/get_num_square.py
 import os
-from dataclasses import dataclass, asdict, field
+import datetime
+from dataclasses import dataclass, asdict
 import requests
 import time
 from typing import Optional
@@ -19,15 +20,20 @@ CONTEXT = os.environ.get("CONTEXT", {})
 @dataclass
 class GitHubContext:
     sha: str
-    repository: str
+    repositoryName: str
+    repositoryId: str
+    repositoryOwner: str
     ref: str
     headCommitUsername: str
     actor: str
+    actorId: str
     workflowRef: str
     eventName: str
     private: bool
     runId: str
     timeTriggered: int
+    timeTriggeredUTCString: str
+    file_urls: list[str]
 
 
 @dataclass
@@ -126,15 +132,20 @@ def send_spec_to_firetail():
     if CONTEXT != {}:
         additional_context = GitHubContext(
             sha=CONTEXT.get("sha", ""),
-            repository=CONTEXT.get("repository", ""),
+            repositoryId=CONTEXT.get("repository_id", ""),
+            repositoryName=CONTEXT.get("name", ""),
+            repositoryOwner=CONTEXT.get("repository_owner", ""),
             ref=CONTEXT.get("ref", ""),
             headCommitUsername=CONTEXT.get("event", {}).get("head_commit", {}).get("author", {}).get("username", ""),
             actor=CONTEXT.get("actor", ""),
+            actorId=CONTEXT.get("actor_id", ""),
             workflowRef=CONTEXT.get("workflow_ref", ""),
             eventName=CONTEXT.get("event_name", ""),
             private=CONTEXT.get("event", {}).get("repository", {}).get("private"),
             runId=CONTEXT.get("run_id"),
             timeTriggered=int(time.time() * 1000 * 1000),
+            timeTriggeredUTCString=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            file_urls=[API_SPEC_LOCATION],
         )
         request_body.context = additional_context
 
