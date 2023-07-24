@@ -254,7 +254,7 @@ class TestContext(FoundationalFunctions):
             "ref": "refs/heads/dev",
             "headCommitUsername": "exampleuser",
             "repositoryId": "662530803",
-            "repositoryName": "",
+            "repositoryName": "test-repo",
             "actor": "exampleuser",
             "workflowRef": "company/test-repo/.github/workflows/test_action.yaml@refs/heads/dev",
             "eventName": "push",
