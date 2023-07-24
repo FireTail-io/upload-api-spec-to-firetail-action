@@ -130,6 +130,7 @@ def send_spec_to_firetail():
     )
 
     if CONTEXT != {}:
+        print("Full Github context:", json.dumps(CONTEXT, indent=2))
         additional_context = GitHubContext(
             sha=CONTEXT.get("sha", ""),
             repositoryId=CONTEXT.get("repository_id", ""),
