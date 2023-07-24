@@ -20,15 +20,20 @@ CONTEXT = os.environ.get("CONTEXT", {})
 @dataclass
 class GitHubContext:
     sha: str
-    repository: str
+    repositoryName: str
+    repositoryId: str
+    repositoryOwner: str
     ref: str
     headCommitUsername: str
     actor: str
+    actorId: str
     workflowRef: str
     eventName: str
     private: bool
     runId: str
     timeTriggered: int
+    timeTriggeredUTCString: str
+    file_urls: list[str]
 
 
 @dataclass
