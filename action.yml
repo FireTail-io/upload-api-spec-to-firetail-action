@@ -15,6 +15,9 @@ inputs:
   API_SPEC_LOCATION:
     description: 'Path to API Spec file'
     required: true
+  CONTEXT:
+    required: false
+    description: 'provides the github context that gets passed with the api call. this allows for determining where the change came from and by which user'
 runs:
   using: "docker"
   image: "Dockerfile"

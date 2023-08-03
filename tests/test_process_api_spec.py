@@ -5,12 +5,57 @@ import sys
 import responses
 import pytest
 import unittest
+from freezegun import freeze_time
 
 sys.path.insert(1, "./src/")
 
 # Global variables to store the request data
 request_body = None
 request_headers = None
+
+
+def load_json_file(location):
+    f = open(location, "r")
+    data = json.loads(f.read())
+    f.close()
+    return data
+
+
+class FoundationalFunctions:
+    def verify_request_made_correctly(self, request_index=0):
+        """
+        Verifies that the request was made correctly.
+
+        Args:
+            request_index: The index of the request in the responses.calls list. Defaults to 0.
+        """
+        request = responses.calls[request_index].request
+        assert request.url == f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec"
+        assert request.method == "POST"
+        assert request.headers["x-ft-api-key"] == "mock-token"
+
+    def mock_response(self, status, json_data=None, callback=None):
+        """
+        Mocks the response from the Firetail API.
+
+        Args:
+            status: The status code to return in the response.
+            json_data: The JSON data to return in the response. Defaults to None.
+            callback: The callback function to call when a request is made to the mocked API endpoint. Defaults to None.
+        """
+        if callback is None:
+            responses.add(
+                responses.POST,
+                f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec",
+                json=json_data,
+                status=status,
+            )
+        else:
+            responses.add_callback(
+                responses.POST,
+                f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec",
+                callback=callback,
+            )
 
 
 def request_callback(request):
@@ -47,7 +92,7 @@ def import_app_spec_module():
     return importlib.import_module("process_api_spec")
 
 
-class TestProcessAPISpec:
+class TestProcessAPISpec(FoundationalFunctions):
     app_spec_module = import_app_spec_module()
 
     def setup_method(self, method):
@@ -66,41 +111,6 @@ class TestProcessAPISpec:
         global request_headers
         request_body = None
         request_headers = None
-
-    def mock_response(self, status, json_data=None, callback=None):
-        """
-        Mocks the response from the Firetail API.
-
-        Args:
-            status: The status code to return in the response.
-            json_data: The JSON data to return in the response. Defaults to None.
-            callback: The callback function to call when a request is made to the mocked API endpoint. Defaults to None.
-        """
-        if callback is None:
-            responses.add(
-                responses.POST,
-                f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec",
-                json=json_data,
-                status=status,
-            )
-        else:
-            responses.add_callback(
-                responses.POST,
-                f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec",
-                callback=callback,
-            )
-
-    def verify_request_made_correctly(self, request_index=0):
-        """
-        Verifies that the request was made correctly.
-
-        Args:
-            request_index: The index of the request in the responses.calls list. Defaults to 0.
-        """
-        request = responses.calls[request_index].request
-        assert request.url == f"{self.app_spec_module.FIRETAIL_API_URL}/code_repository/spec"
-        assert request.method == "POST"
-        assert request.headers["x-ft-api-key"] == "mock-token"
 
     @responses.activate
     def test_api_post_successfully(self):
@@ -200,3 +210,59 @@ class TestProcessAPISpec:
 
         for i in range(5):
             self.verify_request_made_correctly(i)
+
+
+class TestContext(FoundationalFunctions):
+    app_spec_module = import_app_spec_module()
+
+    def setup_method(self, method):
+        """
+        Resets the responses object and sets the app_spec_module variables to their default values.
+
+        Args:
+            method: The method being run.
+        """
+        responses.reset()
+        context_file = load_json_file("tests/example/github_context.json")
+        self.app_spec_module.CONTEXT = context_file
+        self.app_spec_module.API_SPEC_LOCATION = "tests/openapi/good_3.1_spec.yaml"
+        self.app_spec_module.FIRETAIL_API_URL = "https://mock-url.com/api"
+        self.app_spec_module.FIRETAIL_API_TOKEN = "mock-token"
+        self.app_spec_module.COLLECTION_UUID = "mock-uuid"
+        global request_body
+        global request_headers
+        request_body = None
+        request_headers = None
+
+    @responses.activate
+    @freeze_time("2012-01-14")
+    def test_context_passed(self):
+        """
+        Test context was passed in correctly
+        """
+        self.mock_response(201, callback=request_callback)
+
+        self.app_spec_module.send_spec_to_firetail()
+
+        self.verify_request_made_correctly()
+
+        # Check that the request body was correct
+        request_data = json.loads(request_body)
+        assert request_data["context"] == {
+            "sha": "d4320sse72c629c804e189cf591f3fe091941345",
+            "repositoryOwner": "company",
+            "ref": "refs/heads/dev",
+            "headCommitUsername": "exampleuser",
+            "repositoryId": "662530803",
+            "repositoryName": "test-repo",
+            "actor": "exampleuser",
+            "workflowRef": "company/test-repo/.github/workflows/test_action.yaml@refs/heads/dev",
+            "eventName": "push",
+            "private": True,
+            "runId": "5589140733",
+            "actorId": "107564215",
+            "timeTriggered": 1326499200000000,
+            "timeTriggeredUTCString": "2012-01-14T00:00:00+00:00",
+            "eventName": "push",
+            "file_urls": ["tests/openapi/good_3.1_spec.yaml"],
+        }
