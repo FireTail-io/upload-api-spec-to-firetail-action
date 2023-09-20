@@ -1,4 +1,5 @@
-PyYAML
+pyyaml==6.0.1
 requests
-openapi-spec-validator
-prance
+openapi-spec-validator==0.6.0
+prance==23.6.21.0
+pyyaml==6.0.1
