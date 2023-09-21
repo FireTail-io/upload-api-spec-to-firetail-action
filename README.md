@@ -12,7 +12,7 @@ This GitHub Action will send an OpenAPI/Swagger specification to FireTail's plat
 ```yaml
 steps:
   - uses: actions/checkout@v3
-  - uses: FireTail-io/upload-api-spec-to-firetail-action@v1.0.1
+  - uses: FireTail-io/upload-api-spec-to-firetail-action@v1.0.3
     env:
       FIRETAIL_API_TOKEN: ${{ secrets.FIRETAIL_API_TOKEN }}
       COLLECTION_UUID: ${{ env.COLLECTION_UUID }}
